@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>অনলাইন মডেল টেস্ট - FA Rid Academy 🥰</title>
+    
+    <!-- Google Fonts: Hind Siliguri -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- jsPDF & html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #ec4899;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text: #1F2937;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-top: 85px; /* Space for fixed header */
+        }
+
+        /* Modern Glass Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 15px;
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Modern Timer Style */
+        .timer-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timer-box {
+            background: #111827;
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-family: monospace;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-width: 70px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .timer-label {
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: 600;
+            display: none; /* Hidden on very small screens */
+        }
+        
+        .timer-danger {
+            background: var(--danger) !important;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* Brand Style */
+        .brand {
+            font-weight: 800;
+            font-size: 1.1rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Download Button in Header */
+        .btn-header {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(99, 102, 241, 0.3);
+            transition: transform 0.2s;
+        }
+        .btn-header:active { transform: scale(0.95); }
+
+        /* Mobile Layout Tweaks for Header */
+        @media (max-width: 400px) {
+            .brand { font-size: 0.9rem; max-width: 100px; }
+            .timer-box { font-size: 1rem; padding: 4px 10px; min-width: 60px; }
+            .btn-header span { display: none; } /* Hide text, show icon only */
+            .btn-header::after { content: '📥'; font-size: 1.2rem; }
+        }
+        @media (min-width: 401px) {
+            .timer-label { display: block; }
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+            padding-bottom: 100px;
+        }
+
+        /* Subject Header Info */
+        .exam-info-header {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 25px;
+            background: linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+        }
+
+        .exam-info-header h2 {
+            margin: 0 0 5px 0;
+            color: var(--primary-dark);
+            font-size: 1.4rem;
+        }
+
+        .exam-type-badge {
+            display: inline-block;
+            background: #e0e7ff;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        /* Question Cards */
+        .question-card {
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1f2937;
+            line-height: 1.5;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #4b5563;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary);
+            background: #eef2ff;
+        }
+
+        input[type="radio"] {
+            min-width: 20px;
+            min-height: 20px;
+            margin-right: 12px;
+            accent-color: var(--primary);
+        }
+
+        .locked-option {
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        
+        /* Results Colors */
+        .correct-answer {
+            background-color: #d1fae5 !important;
+            border-color: var(--success) !important;
+            color: #064e3b !important;
+        }
+
+        .wrong-answer {
+            background-color: #fee2e2 !important;
+            border-color: var(--danger) !important;
+            color: #7f1d1d !important;
+        }
+
+        .result-info {
+            font-size: 0.9rem;
+            margin-top: 10px;
+            font-weight: 700;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        /* Explanation Box Style (Glass Effect) */
+        .explanation-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(224, 231, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #374151;
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Result Dashboard */
+        #result-dashboard {
+            display: none;
+            margin-bottom: 25px;
+            padding: 25px;
+            text-align: center;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .grade-badge {
+            font-size: 3.5rem;
+            font-weight: 800;
+            display: inline-block;
+            padding: 10px 30px;
+            border-radius: 50px;
+            background: #f3f4f6;
+            margin: 15px 0;
+            letter-spacing: -2px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stat-value { font-size: 1.4rem; font-weight: 800; display: block; }
+        .stat-label { font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+
+        /* Submit Button */
+        .btn-submit {
+            display: block;
+            margin: 20px auto 40px auto;
+            width: 100%;
+            background: #111827;
+            color: white;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn-submit:active { transform: scale(0.98); }
+
+        /* Modals & Overlays */
+        #warning-modal, #password-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .hidden { display: none !important; }
+        .blur-filter { filter: blur(10px); pointer-events: none; }
+
+        .pass-input {
+            padding: 15px;
+            font-size: 1.5rem;
+            border-radius: 12px;
+            border: none;
+            margin: 20px 0;
+            text-align: center;
+            width: 200px;
+            outline: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Flower Animation */
+        .flower {
+            position: fixed;
+            top: -50px;
+            font-size: 24px;
+            animation: fall linear forwards;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        /* Hidden PDF */
+        #pdf-hidden-template {
+            position: absolute; left: -9999px; top: 0; width: 800px;
+            background: white; padding: 40px;
+            font-family: 'Hind Siliguri', sans-serif; color: black;
+        }
+        #pdf-content-list {
+            display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px; row-gap: 10px;
+        }
+        .pdf-row {
+            display: flex; align-items: flex-start; padding: 8px 0;
+            border-bottom: 1px solid #eee; font-size: 14px;
+        }
+        .pdf-header {
+            text-align: center; margin-bottom: 25px;
+            border-bottom: 2px solid #333; padding-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="timer-wrapper">
+            <div id="timer" class="timer-box">30:00</div>
+            <span class="timer-label">সময় বাকি</span>
+        </div>
+        
+        <div class="brand">FA Rid<br>Academy 🥰</div>
+        
+        <button class="btn-header" onclick="openPasswordModal()">
+            <span>উত্তরপত্র</span>
+        </button>
+    </header>
+
+    <!-- Content -->
+    <div class="container">
+        
+        <!-- Exam Subject Header (NEW) -->
+        <div class="glass-panel exam-info-header">
+            <h2>বিষয়: পদার্থবিজ্ঞান - গতি (অধ্যায় ২)</h2>
+            <div class="exam-type-badge">পরীক্ষার ধরণ: এমসিকিউ (MCQ)</div>
+        </div>
+
+        <!-- Result Dashboard -->
+        <div id="result-dashboard">
+            <h2 style="margin:0; color: var(--primary); font-size: 1.5rem;">ফলাফল বিবরণী</h2>
+            <div class="grade-badge" id="grade-display">A+</div>
+            <div id="score-text" style="font-size: 1.1rem; margin-bottom: 10px; color: #4b5563;"></div>
+            
+            <div class="stats-grid">
+                <div class="stat-card" style="border-left: 4px solid var(--success);">
+                    <span class="stat-value" id="stat-correct" style="color: var(--success)">0</span>
+                    <span class="stat-label">সঠিক</span>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid var(--danger);">
+                    <span class="stat-value" id="stat-wrong" style="color: var(--danger)">0</span>
+                    <span class="stat-label">ভুল</span>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid var(--warning);">
+                    <span class="stat-value" id="stat-skipped" style="color: var(--warning)">0</span>
+                    <span class="stat-label">উত্তর দেননি</span>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid var(--primary);">
+                    <span class="stat-value" id="stat-percentage" style="color: var(--primary)">0%</span>
+                    <span class="stat-label">প্রাপ্ত নম্বর</span>
+                </div>
+            </div>
+            
+            <!-- Time Taken Display -->
+            <div style="margin-top: 20px; font-weight: bold; color: #111827;">
+                ⏱️ থামার সময়: <span id="final-time-display">--:--</span>
+            </div>
+        </div>
+
+        <div id="quiz-container"></div>
+        
+        <button id="submit-btn" class="btn-submit" onclick="submitExam()">পরীক্ষা জমা দিন</button>
+    </div>
+
+    <!-- Modals -->
+    <div id="warning-modal">
+        <h1 style="font-size: 3rem;">⚠️</h1>
+        <h2>সতর্কতা!</h2>
+        <p>ট্যাব পরিবর্তন নিষিদ্ধ।</p>
+        <button class="btn-primary" onclick="closeWarning()">ফিরে যান</button>
+    </div>
+
+    <div id="password-modal">
+        <h2>পাসওয়ার্ড দিন</h2>
+        <input type="text" id="pdf-password" class="pass-input" inputmode="numeric" placeholder="****" maxlength="5">
+        <div style="display:flex; gap:10px;">
+            <button class="btn-primary" onclick="verifyPassword()">যাচাই করুন</button>
+            <button class="btn-primary" style="background:#4b5563;" onclick="closePasswordModal()">বন্ধ</button>
+        </div>
+        <p id="pass-error" style="color: #ff6b6b; display: none; margin-top: 10px;">ভুল পাসওয়ার্ড!</p>
+    </div>
+
+    <!-- PDF Template -->
+    <div id="pdf-hidden-template">
+        <div class="pdf-header">
+            <h1 style="margin:0; color: #4F46E5;">FA Rid Academy 🥰</h1>
+            <p>মডেল টেস্ট উত্তরপত্র: পদার্থবিজ্ঞান - গতি (অধ্যায় ২)</p>
+            <small id="pdf-date"></small>
+        </div>
+        <div id="pdf-content-list"></div>
+        <div style="margin-top:20px; text-align:center; border-top:1px solid #ccc;">Generated by FA Rid Academy System</div>
+    </div>
+
+    <script>
+    // ================= DATA: SSC 2026 PHYSICS CH 2 (MOTION) =================
+    const questions = [
+        { 
+            q: "১. সময়ের সাথে পারিপার্শ্বিকের সাপেক্ষে বস্তুর অবস্থানের পরিবর্তন না হওয়াকে কী বলে?", 
+            o: ["গতি", "স্থিতি", "সরণ", "বেগ"], 
+            a: 1,
+            exp: "সময়ের সাথে যদি বস্তুর অবস্থানের পরিবর্তন না হয়, তবে তাকে স্থিতি (Rest) বলে।"
+        },
+        { 
+            q: "২. কোনটি স্কেলার রাশি?", 
+            o: ["সরণ", "বেগ", "দ্রুতি", "ত্বরণ"], 
+            a: 2,
+            exp: "সরণ, বেগ এবং ত্বরণ-এর দিক আছে, তাই এরা ভেক্টর রাশি। দ্রুতি (Speed) এর শুধু মান আছে, দিক নেই।"
+        },
+        { 
+            q: "৩. অভিকর্ষজ ত্বরণের মাত্রা সমীকরণ কোনটি?", 
+            o: ["LT⁻¹", "LT⁻²", "MLT⁻²", "L²T⁻²"], 
+            a: 1,
+            exp: "ত্বরণের মাত্রা LT⁻²। যেহেতু অভিকর্ষজ ত্বরণ এক প্রকার ত্বরণ, তাই এর মাত্রা একই হবে।"
+        },
+        { 
+            q: "৪. স্থির অবস্থান থেকে সুষম ত্বরণে চলমান বস্তুর অতিক্রান্ত দূরত্ব সময়ের—", 
+            o: ["সমানুপাতিক", "বর্গের সমানুপাতিক", "ব্যস্তানুপাতিক", "বর্গের ব্যস্তানুপাতিক"], 
+            a: 1,
+            exp: "পড়ন্ত বস্তুর ২য় সূত্র বা গতির সমীকরণ s = ut + ½at² থেকে, স্থির অবস্থান (u=0) হলে s ∝ t²।"
+        },
+        { 
+            q: "৫. একটি গাড়ি 72 km/h বেগে চলছে। এর বেগ m/s এককে কত?", 
+            o: ["10 m/s", "15 m/s", "20 m/s", "25 m/s"], 
+            a: 2,
+            exp: "72 km/h = (72 × 1000) / 3600 m/s = 20 m/s।"
+        },
+        { 
+            q: "৬. মন্দনের একক কোনটি?", 
+            o: ["ms⁻¹", "ms⁻²", "Ns", "m²s⁻²"], 
+            a: 1,
+            exp: "ত্বরণ এবং মন্দন উভয়ের একক মিটার/সেকেন্ড² (ms⁻²)।"
+        },
+        { 
+            q: "৭. বেগ-সময় লেখচিত্রের ঢাল (Slope) কী নির্দেশ করে?", 
+            o: ["সরণ", "ত্বরণ", "দ্রুতি", "বল"], 
+            a: 1,
+            exp: "বেগ বনাম সময় (v-t) লেখচিত্রের ঢাল ত্বরণ (Acceleration) নির্দেশ করে।"
+        },
+        { 
+            q: "৮. একটি বস্তু স্থির অবস্থান থেকে 2ms⁻² ত্বরণে 5 সেকেন্ড চললে শেষ বেগ কত হবে?", 
+            o: ["5 ms⁻¹", "10 ms⁻¹", "15 ms⁻¹", "20 ms⁻¹"], 
+            a: 1,
+            exp: "আমরা জানি, v = u + at। এখানে u=0, a=2, t=5। সুতরাং, v = 0 + 2×5 = 10 ms⁻¹।"
+        },
+        { 
+            q: "৯. কোনো বস্তুর সরণ শূন্য হলেও কোনটি শূন্য নাও হতে পারে?", 
+            o: ["বেগ", "গড় বেগ", "দূরত্ব", "ত্বরণ"], 
+            a: 2,
+            exp: "বস্তু ঘুরে আবার আগের জায়গায় আসলে সরণ শূন্য হয়, কিন্তু অতিক্রান্ত দূরত্ব শূন্য হয় না।"
+        },
+        { 
+            q: "১০. মুক্তভাবে পড়ন্ত বস্তুর ক্ষেত্রে বেগ ও সময়ের সম্পর্ক কেমন?", 
+            o: ["v ∝ t", "v ∝ t²", "v ∝ √t", "v ∝ 1/t"], 
+            a: 0,
+            exp: "পড়ন্ত বস্তুর ১ম সূত্র অনুযায়ী, স্থির অবস্থান থেকে বিনা বাধায় পড়ন্ত বস্তুর বেগ সময়ের সমানুপাতিক (v ∝ t)।"
+        },
+        { 
+            q: "১১. 54 km/h বেগে চলন্ত গাড়িতে ব্রেক কষে 5 সেকেন্ডে থামানো হলো। ত্বরণ কত?", 
+            o: ["-3 ms⁻²", "3 ms⁻²", "-10.8 ms⁻²", "10.8 ms⁻²"], 
+            a: 0,
+            exp: "u = 54 km/h = 15 m/s, v = 0, t = 5s। a = (v-u)/t = (0-15)/5 = -3 ms⁻²।"
+        },
+        { 
+            q: "১২. কোনটি ভেক্টর রাশি?", 
+            o: ["কাজ", "শক্তি", "ভরবেগ", "ক্ষমতা"], 
+            a: 2,
+            exp: "ভরবেগ (Momentum) এর নির্দিষ্ট দিক আছে, তাই এটি ভেক্টর রাশি। বাকিগুলো স্কেলার।"
+        },
+        { 
+            q: "১৩. বৃত্তাকার পথে ঘূর্ণায়মান বস্তুর ত্বরণ কোন দিকে কাজ করে?", 
+            o: ["স্পর্শক বরাবর", "কেন্দ্রের দিকে", "কেন্দ্রের বাইরে", "লম্ব বরাবর"], 
+            a: 1,
+            exp: "বৃত্তাকার গতির ক্ষেত্রে কেন্দ্রমুখী ত্বরণ সর্বদা কেন্দ্রের দিকে ক্রিয়াশীল থাকে।"
+        },
+        { 
+            q: "১৪. একটি বস্তু 20m উপর থেকে ছেড়ে দিলে মাটিতে পড়তে কত সময় লাগবে? (g = 10 ms⁻²)", 
+            o: ["1s", "2s", "3s", "4s"], 
+            a: 1,
+            exp: "h = ut + ½gt²। এখানে u=0। 20 = 0 + ½×10×t² => 5t² = 20 => t² = 4 => t = 2s।"
+        },
+        { 
+            q: "১৫. রৈখিক গতির সমীকরণ কোনটি সঠিক নয়?", 
+            o: ["v = u + at", "s = ut + ½at²", "v² = u² + 2as", "s = vt"], 
+            a: 3,
+            exp: "s = vt শুধুমাত্র সমবেগের ক্ষেত্রে প্রযোজ্য। সুষম ত্বরণের ক্ষেত্রে s = ((u+v)/2)*t বা s = ut + ½at² ব্যবহৃত হয়।"
+        },
+        { 
+            q: "১৬. পর্যায়বৃত্ত গতি নয় কোনটি?", 
+            o: ["ঘড়ির কাঁটার গতি", "ফ্যানের পাখার গতি", "পিস্টনের গতি", "সোজা রাস্তায় গাড়ির গতি"], 
+            a: 3,
+            exp: "সোজা রাস্তায় গাড়ির গতি পুনরাবৃত্ত হয় না, তাই এটি চলন গতি, পর্যায়বৃত্ত গতি নয়।"
+        },
+        { 
+            q: "১৭. 10m ব্যাসার্ধের বৃত্তাকার পথ একবার ঘুরে আসলে সরণ কত?", 
+            o: ["0 m", "10 m", "20 m", "62.8 m"], 
+            a: 0,
+            exp: "বৃত্তাকার পথে পূর্ণ ঘূর্ণন শেষে আদি ও শেষ অবস্থান একই হয়, তাই সরণ শূন্য।"
+        },
+        { 
+            q: "১৮. নিচের কোনটি মৌলিক রাশি নয়?", 
+            o: ["সময়", "দৈর্ঘ্য", "বেগ", "ভর"], 
+            a: 2,
+            exp: "বেগ একটি লব্ধ রাশি কারণ এটি দৈর্ঘ্য ও সময়ের ওপর নির্ভর করে।"
+        },
+        { 
+            q: "১৯. কোনো বস্তুর অবস্থান সময়ের সাথে পরিবর্তিত না হলে তার বেগ কত?", 
+            o: ["অসীম", "শূন্য", "ধনাত্মক", "ঋণাত্মক"], 
+            a: 1,
+            exp: "অবস্থান পরিবর্তন না হওয়া মানে সরণ শূন্য। আর সরণ শূন্য হলে বেগ (v=s/t) শূন্য হবে।"
+        },
+        { 
+            q: "২০. নিচের কোন লেখচিত্রটি সুষম ত্বরণ নির্দেশ করে?", 
+            o: ["s-t লেখচিত্রে সরলরেখা", "v-t লেখচিত্রে মূলবিন্দুগামী সরলরেখা", "v-t লেখচিত্রে বক্ররেখা", "a-t লেখচিত্রে আনত সরলরেখা"], 
+            a: 1,
+            exp: "বেগ-সময় (v-t) লেখচিত্রে মূলবিন্দুগামী সরলরেখা মানে বেগ সময়ের সাথে সমান হারে বাড়ছে, অর্থাৎ সুষম ত্বরণ।"
+        },
+        { 
+            q: "২১. নিক্ষিপ্ত বস্তুর ক্ষেত্রে সর্বোচ্চ উচ্চতায় বেগ কত?", 
+            o: ["সর্বোচ্চ", "সর্বনিম্ন (শূন্য)", "9.8 ms⁻¹", "অসীম"], 
+            a: 1,
+            exp: "খাড়া উপরের দিকে নিক্ষিপ্ত বস্তু সর্বোচ্চ উচ্চতায় ক্ষণিকের জন্য থেমে যায়, তাই বেগ শূন্য হয়।"
+        },
+        { 
+            q: "২২. একটি গাড়ির বেগ 10s এ 5ms⁻¹ থেকে 25ms⁻¹ হলো। অতিক্রান্ত দূরত্ব কত?", 
+            o: ["100 m", "150 m", "200 m", "250 m"], 
+            a: 1,
+            exp: "s = ((u+v)/2) × t = ((5+25)/2) × 10 = (30/2) × 10 = 15 × 10 = 150 m।"
+        },
+        { 
+            q: "২৩. 'g' এর আদর্শ মান কত?", 
+            o: ["9.83 ms⁻²", "9.78 ms⁻²", "9.80665 ms⁻²", "9.81 ms⁻²"], 
+            a: 2,
+            exp: "ভূপৃষ্ঠে g এর আদর্শ মান ধরা হয় 9.80665 ms⁻² বা সংক্ষেপে 9.8 ms⁻²।"
+        },
+        { 
+            q: "২৪. স্পন্দন গতি বা দোলন গতির উদাহরণ কোনটি?", 
+            o: ["ঘড়ির কাঁটা", "সরল দোলক", "ট্রেনের চাকা", "পৃথিবীর গতি"], 
+            a: 1,
+            exp: "সরল দোলকের গতি হলো স্পন্দন গতি, কারণ এটি নির্দিষ্ট সময় পর পর গতির দিক পরিবর্তন করে।"
+        },
+        { 
+            q: "২৫. ত্বরণের মাত্রা কোনটি?", 
+            o: ["LT⁻¹", "L⁻¹T", "LT⁻²", "L²T⁻²"], 
+            a: 2,
+            exp: "ত্বরণ = বেগ/সময় = (দৈর্ঘ্য/সময়)/সময় = দৈর্ঘ্য/সময়² = LT⁻²।"
+        },
+        { 
+            q: "২৬. একটি বস্তু সমবেগে চললে ত্বরণ কত?", 
+            o: ["ধনাত্মক", "ঋণাত্মক", "শূন্য", "অসীম"], 
+            a: 2,
+            exp: "সমবেগে চললে বেগের কোনো পরিবর্তন হয় না। আর বেগের পরিবর্তন না হলে ত্বরণ (a = (v-u)/t) শূন্য হয়।"
+        },
+        { 
+            q: "২৭. 49m/s বেগে খাড়া উপরে নিক্ষিপ্ত বস্তু কত সময় শূন্যে থাকবে?", 
+            o: ["5s", "10s", "4.9s", "9.8s"], 
+            a: 1,
+            exp: "বিচরণ কাল T = 2u/g = (2 × 49) / 9.8 = 98 / 9.8 = 10s।"
+        },
+        { 
+            q: "২৮. চলন্ত ফ্যানের সুইচ বন্ধ করলে পাখার গতি কেমন হবে?", 
+            o: ["সুষম বেগ", "সুষম ত্বরণ", "সুষম মন্দন", "অসম মন্দন"], 
+            a: 3,
+            exp: "বাতাসের ঘর্ষণের কারণে ফ্যানটি থামতে থাকে, যা মন্দন। এটি সাধারণত সুষম হয় না, তবে অপশনে মন্দনই মূল কথা।"
+        },
+        { 
+            q: "২৯. পড়ন্ত বস্তুর তৃতীয় সূত্রটি কী?", 
+            o: ["v ∝ t", "h ∝ t²", "v ∝ h", "h ∝ t"], 
+            a: 1,
+            exp: "পড়ন্ত বস্তুর ৩য় সূত্র: স্থির অবস্থান থেকে পড়ন্ত বস্তু নির্দিষ্ট সময়ে যে দূরত্ব অতিক্রম করে তা সময়ের বর্গের সমানুপাতিক (h ∝ t²)।"
+        },
+        { 
+            q: "৩০. সুষম বেগের ক্ষেত্রে দূরত্ব-সময় লেখচিত্র কেমন হবে?", 
+            o: ["বক্ররেখা", "মূলবিন্দুগামী সরলরেখা", "X অক্ষের সমান্তরাল", "Y অক্ষের সমান্তরাল"], 
+            a: 1,
+            exp: "সুষম বেগে অতিক্রান্ত দূরত্ব সময়ের সমানুপাতিক (s=vt), তাই লেখচিত্রটি মূলবিন্দুগামী সরলরেখা হবে।"
+        }
+    ];
+
+    const EXAM_DURATION = 30; // Minutes
+    // *** NEW KEY TO ENSURE FRESH PERSISTENCE TEST ***
+    const KEY = "farid_phy_final_secure_v2"; 
+    let timerInterval, flowerInterval;
+    let userAnswers = JSON.parse(localStorage.getItem(KEY + '_ans')) || {};
+
+    window.onload = () => { initExam(); preventCheating(); };
+
+    function initExam() {
+        const status = JSON.parse(localStorage.getItem(KEY)) || {};
+        
+        // Render Questions
+        document.getElementById('quiz-container').innerHTML = questions.map((q, i) => `
+            <div class="question-card" id="q-${i}">
+                <div class="question-text">${q.q}</div>
+                <div class="options-grid">
+                    ${q.o.map((opt, j) => `
+                        <label class="option-label" id="lbl-${i}-${j}">
+                            <input type="radio" name="q${i}" value="${j}" 
+                                onchange="handleSel(${i}, ${j})"
+                                ${userAnswers[i]!==undefined ? (userAnswers[i]==j?'checked':'disabled') : ''}>
+                            <span>(${['ক','খ','গ','ঘ'][j]}) ${opt}</span>
+                        </label>
+                    `).join('')}
+                </div>
+                <div id="result-${i}" class="result-info"></div>
+                <!-- Explanation Box -->
+                <div id="exp-${i}" class="explanation-box"></div>
+            </div>
+        `).join('');
+
+        // Restore State if Exam Finished
+        if (status.finished) {
+            if(status.finalTime) {
+                document.getElementById('timer').innerText = status.finalTime;
+                document.getElementById('final-time-display').innerText = status.finalTime;
+            } else {
+                document.getElementById('timer').innerText = "00:00";
+            }
+            submitExam(true);
+            return;
+        }
+
+        // Timer Setup (Security: Persistence)
+        // Check if we have a stored target time
+        let target = status.target;
+        if (!target) {
+            // First time load: Set absolute target time
+            target = Date.now() + (EXAM_DURATION * 60 * 1000);
+            localStorage.setItem(KEY, JSON.stringify({ target, finished: false }));
+            enterFullScreen();
+        }
+
+        startTimer(target);
+        
+        // Restore locked answers
+        Object.keys(userAnswers).forEach(idx => lockQ(idx));
+    }
+
+    function startTimer(target) {
+        const el = document.getElementById('timer');
+        
+        // Update function to run immediately and every second
+        const updateTimer = () => {
+            const now = Date.now();
+            const left = Math.floor((target - now) / 1000);
+
+            if (left <= 0) {
+                clearInterval(timerInterval);
+                el.innerText = "00:00";
+                // Auto submit when time over
+                submitExam(false, "00:00");
+            } else {
+                const m = Math.floor(left/60).toString().padStart(2,'0');
+                const s = (left%60).toString().padStart(2,'0');
+                el.innerText = `${m}:${s}`;
+                if(left < 300) el.classList.add('timer-danger');
+            }
+        };
+
+        // Run immediately to prevent "30:00" flash on reload
+        updateTimer();
+        
+        // Start interval
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function handleSel(qIdx, oIdx) {
+        if (JSON.parse(localStorage.getItem(KEY))?.finished) return;
+        if (userAnswers[qIdx] !== undefined) return;
+        
+        if (navigator.vibrate) navigator.vibrate(50); // Light haptic
+        userAnswers[qIdx] = oIdx;
+        localStorage.setItem(KEY + '_ans', JSON.stringify(userAnswers));
+        lockQ(qIdx);
+    }
+
+    function lockQ(idx) {
+        document.getElementsByName(`q${idx}`).forEach(i => {
+            i.disabled = true;
+            i.parentElement.classList.add('locked-option');
+        });
+    }
+
+    function submitExam(isReplay = false, autoTimeStr = null) {
+        clearInterval(timerInterval);
+        document.getElementById('submit-btn').classList.add('hidden');
+        
+        const timerEl = document.getElementById('timer');
+        let finalTimeStr = timerEl.innerText; 
+        
+        if (autoTimeStr) finalTimeStr = autoTimeStr;
+
+        if (!isReplay) {
+            const status = JSON.parse(localStorage.getItem(KEY)) || {};
+            status.finished = true;
+            status.finalTime = finalTimeStr;
+            localStorage.setItem(KEY, JSON.stringify(status));
+            
+            document.getElementById('final-time-display').innerText = finalTimeStr;
+            window.scrollTo(0,0);
+        } else {
+            const status = JSON.parse(localStorage.getItem(KEY)) || {};
+            if(status.finalTime) document.getElementById('final-time-display').innerText = status.finalTime;
+        }
+
+        calcResults(isReplay);
+        
+        document.querySelectorAll('input').forEach(i => {
+            i.disabled = true;
+            i.parentElement.classList.add('locked-option');
+        });
+    }
+
+    function calcResults(isReplay) {
+        let c=0, w=0, s=0;
+        questions.forEach((q, i) => {
+            const u = userAnswers[i];
+            const div = document.getElementById(`result-${i}`);
+            const expDiv = document.getElementById(`exp-${i}`); // Get Explanation Div
+            const card = document.getElementById(`q-${i}`);
+            
+            // Show Explanation
+            expDiv.style.display = 'block';
+            expDiv.innerHTML = `<strong>ব্যাখ্যা:</strong> ${q.exp}`;
+            
+            if (u !== undefined) {
+                if (u == q.a) {
+                    c++;
+                    document.getElementById(`lbl-${i}-${u}`).classList.add('correct-answer');
+                    div.innerHTML = `<span style="color:#059669">✅ সঠিক!</span>`;
+                    card.style.borderLeftColor = "#10B981";
+                } else {
+                    w++;
+                    document.getElementById(`lbl-${i}-${u}`).classList.add('wrong-answer');
+                    document.getElementById(`lbl-${i}-${q.a}`).classList.add('correct-answer');
+                    div.innerHTML = `<span style="color:#DC2626">❌ ভুল! সঠিক: ${q.o[q.a]}</span>`;
+                    card.style.borderLeftColor = "#EF4444";
+                }
+            } else {
+                s++;
+                document.getElementById(`lbl-${i}-${q.a}`).classList.add('correct-answer');
+                // Updated Text
+                div.innerHTML = `<span style="color:#D97706">⚠️ উত্তর দেওয়া হয়নি</span>`;
+                card.style.borderLeftColor = "#F59E0B";
+            }
+        });
+
+        const pct = Math.round((c / questions.length) * 100);
+        let g='F', col='#EF4444';
+        if(pct>=80){g='A+';col='#10B981';}
+        else if(pct>=70){g='A';col='#34D399';}
+        else if(pct>=60){g='A-';col='#60A5FA';}
+        else if(pct>=50){g='B';col='#FBBF24';}
+        else if(pct>=40){g='C';col='#F59E0B';}
+        else if(pct>=33){g='D';col='#F87171';}
+
+        document.getElementById('stat-correct').innerText = c;
+        document.getElementById('stat-wrong').innerText = w;
+        document.getElementById('stat-skipped').innerText = s;
+        document.getElementById('stat-percentage').innerText = pct + '%';
+        
+        const badge = document.getElementById('grade-display');
+        badge.innerText = g;
+        badge.style.color = col;
+        badge.style.border = `3px solid ${col}`;
+        
+        document.getElementById('score-text').innerHTML = `আপনি <b>${questions.length}</b> এর মধ্যে <b>${c}</b> পেয়েছেন।`;
+        document.getElementById('result-dashboard').style.display = 'block';
+
+        if (!isReplay && pct >= 80) flowerRain();
+    }
+
+    function flowerRain() {
+        const end = Date.now() + 5000;
+        flowerInterval = setInterval(() => {
+            if (Date.now() > end) clearInterval(flowerInterval);
+            else createFlower();
+        }, 100);
+    }
+
+    function createFlower() {
+        const el = document.createElement('div');
+        el.innerText = ['🌸','🌺','🌹','🌷','💐','🌼','🌻'][Math.floor(Math.random()*7)];
+        el.className = 'flower';
+        el.style.left = Math.random()*100 + 'vw';
+        el.style.animationDuration = (Math.random()*2+3) + 's';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 5000);
+    }
+
+    function preventCheating() {
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if(e.key==="F12"||(e.ctrlKey&&(e.key==="u"||e.key==="s"||e.key==="p"))) e.preventDefault();
+        });
+        document.addEventListener('visibilitychange', () => {
+            if(document.hidden && !JSON.parse(localStorage.getItem(KEY))?.finished) {
+                document.body.classList.add('blur-filter');
+                document.getElementById('warning-modal').style.display = 'flex';
+            }
+        });
+    }
+
+    function closeWarning() {
+        document.body.classList.remove('blur-filter');
+        document.getElementById('warning-modal').style.display = 'none';
+        enterFullScreen();
+    }
+    
+    function enterFullScreen() {
+        if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+    }
+
+    // PDF Logic
+    function openPasswordModal() { document.getElementById('password-modal').style.display = 'flex'; }
+    function closePasswordModal() { 
+        document.getElementById('password-modal').style.display = 'none'; 
+        document.getElementById('pass-error').style.display='none';
+    }
+    function verifyPassword() {
+        if(document.getElementById('pdf-password').value === "20260") {
+            closePasswordModal();
+            genPDF();
+        } else document.getElementById('pass-error').style.display='block';
+    }
+
+    async function genPDF() {
+        const btn = document.querySelector('.btn-header');
+        const old = btn.innerHTML;
+        btn.innerHTML = '⏳';
+        
+        try {
+            const list = document.getElementById('pdf-content-list');
+            document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('bn-BD');
+            list.innerHTML = questions.map((q,i)=>`
+                <div class="pdf-row">
+                    <div style="width:40px;font-weight:bold;">${(i+1).toLocaleString('bn-BD')}।</div>
+                    <div style="flex:1;">
+                        <b>(${['ক','খ','গ','ঘ'][q.a]})</b> ${q.o[q.a]} <br>
+                        <small style="color:#555;">${q.exp}</small>
+                    </div>
+                </div>
+            `).join('');
+
+            const cvs = await html2canvas(document.getElementById('pdf-hidden-template'), {scale:2});
+            const pdf = new window.jspdf.jsPDF('p','mm','a4');
+            const w = 190, h = (cvs.height * w)/cvs.width;
+            pdf.addImage(cvs.toDataURL('image/png'), 'PNG', 10, 10, w, h);
+            pdf.save("Answer_Sheet_FA_Rid_Academy.pdf");
+            alert("✅ ডাউনলোড সম্পন্ন!");
+        } catch(e) { console.error(e); alert("সমস্যা হয়েছে!"); }
+        finally { btn.innerHTML = old; }
+    }
+    </script>
+</body>
+</html>
